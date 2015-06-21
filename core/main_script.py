@@ -73,4 +73,4 @@ start_time = time.time()
 #test(r'./../dataset/mnist_train_784_poly_8vr.dat', r'./../dataset/mnist_test_784_poly_8vr.dat', svm_para)
 
 svm_para = {'C': 10.0, 'kernel': 'rbf', 'gamma': 0.00002, 'tol': 0.01, 'verbose': False}
-test(r'./../dataset/covtype_tr_2vr.data', r'./../dataset/covtype_tst_2vr.data', svm_para)
+test(r'./dataset/covtype_tr_2vr.data', r'./dataset/covtype_tst_2vr.data', svm_para)
