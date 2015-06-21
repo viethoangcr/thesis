@@ -169,7 +169,7 @@ class RandomSamplingSVM(object):
                     
             new_X_index = self.__union_one_third_set(subsamples, index)
             new_X_index = np.union1d(new_X_index, error_index)
-            
+            new_X_index = [int(v) for v in new_X_index]
             X = X[new_X_index,]
             y = y[new_X_index,]
             n.append(X.shape[0])
@@ -226,7 +226,7 @@ class RandomSamplingSVM(object):
                     
             new_X_index = self.__union_one_half_set(subsamples, index)
             new_X_index = np.union1d(new_X_index, error_index)
-            
+            print(len(new_X_index))
             X = X[new_X_index,]
             y = y[new_X_index,]
             n.append(X.shape[0])
@@ -243,7 +243,7 @@ class RandomSamplingSVM(object):
     
     def train_by_file(self, svmlight_file_address:str, beta=0.01, g=1, debug=False):
         X_train, y_train = datasets.load_svmlight_file(svmlight_file_address)
-        return self.train_one_half(X_train, y_train, beta, g, debug)
+        return self.train_one_third(X_train, y_train, beta, g, debug)
         
     def train_large_file(self, svmlight_file_address:str, beta=0.01, g=1, debug=False, temp_folder=None):
         c = 1
