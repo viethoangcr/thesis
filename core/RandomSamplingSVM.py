@@ -213,7 +213,7 @@ class RandomSamplingSVM(object):
             
             for sample in subsamples:
                 #try:
-                if (flag == 1)
+                if flag == 1:
                     trainSVC = self.__get_svc(X[sample,], y[sample,])
                     index.append(trainSVC.support_)
                     continue
@@ -227,14 +227,16 @@ class RandomSamplingSVM(object):
                         expected_X = trainSVC.predict(X[iTestSample,])
                         if expected_X != y[iTestSample,]:
                             error_index.append(iTestSample)
+                    
+                    print("The ratio of error index: %d / %d", len(error_index), len(sample))
                 #except BaseException as error:
                 #    print(error)
                 #    return Nones
                     
-            if flag == 0
+            if flag == 0:
                 new_X_index = self.__union_one_half_set(subsamples, index)
                 new_X_index = np.union1d(new_X_index, error_index)
-            else
+            else:
                 new_X_index = self.__union_set(subsamples, index)
                 flag = 2
 
