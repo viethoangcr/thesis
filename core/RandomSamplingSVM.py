@@ -192,7 +192,7 @@ class RandomSamplingSVM(object):
         y = y_init
         N = X.shape[0]
         n = [N]
-        flag = 0
+        
         starttime = time.time()
         
         while True:
@@ -201,23 +201,22 @@ class RandomSamplingSVM(object):
                 print()
                 print("Iteration " + str(i+1))
                 
-            i = i + 1
+
+            i = i + 1            
             k = math.ceil(i*beta*N)
             m = math.ceil(n[i-1] * g / k)
             subsamples = self.__create_subsamples(n[i-1], m, k)
+
             index = []
 
             iSample = 0
             trainSVC = None
             error_index = []
             
+            print("Number of S: %d" %len(subsamples))
+            
             for sample in subsamples:
                 #try:
-                if flag == 1:
-                    trainSVC = self.__get_svc(X[sample,], y[sample,])
-                    index.append(trainSVC.support_)
-                    continue
-                
                 iSample = 1 - iSample
                 if iSample == 1:
                     trainSVC = self.__get_svc(X[sample,], y[sample,])
@@ -225,21 +224,18 @@ class RandomSamplingSVM(object):
                 else:
                     for iTestSample in sample:
                         expected_X = trainSVC.predict(X[iTestSample,])
-                        if expected_X != y[iTestSample,]:
+                        if expected_X == y[iTestSample,]:
                             error_index.append(iTestSample)
                     
-                    print("The ratio of error index: %d / %d", len(error_index), len(sample))
+                    #print("The ratio of error index: %d / %d", len(error_index), len(sample))
                 #except BaseException as error:
                 #    print(error)
                 #    return Nones
                     
-            if flag == 0:
-                new_X_index = self.__union_one_half_set(subsamples, index)
-                new_X_index = np.union1d(new_X_index, error_index)
-            else:
-                new_X_index = self.__union_set(subsamples, index)
-                flag = 2
-
+        
+            new_X_index = self.__union_one_half_set(subsamples, index)
+            new_X_index = np.union1d(new_X_index, error_index)
+            
             new_X_index = [int(v) for v in new_X_index]
 
             X = X[new_X_index,]
@@ -249,19 +245,16 @@ class RandomSamplingSVM(object):
             if debug:
                 print("Number of SVs: %d / %d" % (n[i], n[i-1]))
                 print("Execute time (in second): %s" % (time.time() - starttime))
-
-            if flag == 2:
-                break
             
             if  g*n[i]*k/c >= (n[i-1]-n[i])**2:
-                flag = 1
+                break
         svc = SVC(**self.svm_parameters)
         self.model = svc.fit(X,y)
         return self.model
     
     def train_by_file(self, svmlight_file_address:str, beta=0.01, g=1, debug=False):
         X_train, y_train = datasets.load_svmlight_file(svmlight_file_address)
-        return self.train_one_third(X_train, y_train, beta, g, debug)
+        return self.train_one_half(X_train, y_train, beta, g, debug)
         
     def train_large_file(self, svmlight_file_address:str, beta=0.01, g=1, debug=False, temp_folder=None):
         c = 1
