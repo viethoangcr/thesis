@@ -91,6 +91,7 @@ class RandomSamplingSVM(object):
         y = y_init
         N = X.shape[0]
         n = [N]
+        
         starttime = time.time()
         
         while True:
@@ -191,6 +192,7 @@ class RandomSamplingSVM(object):
         y = y_init
         N = X.shape[0]
         n = [N]
+        flag = 0
         starttime = time.time()
         
         while True:
@@ -211,6 +213,11 @@ class RandomSamplingSVM(object):
             
             for sample in subsamples:
                 #try:
+                if (flag == 1)
+                    trainSVC = self.__get_svc(X[sample,], y[sample,])
+                    index.append(trainSVC.support_)
+                    continue
+                
                 iSample = 1 - iSample
                 if iSample == 1:
                     trainSVC = self.__get_svc(X[sample,], y[sample,])
@@ -224,9 +231,15 @@ class RandomSamplingSVM(object):
                 #    print(error)
                 #    return Nones
                     
-            new_X_index = self.__union_one_half_set(subsamples, index)
-            new_X_index = np.union1d(new_X_index, error_index)
-            print(len(new_X_index))
+            if flag == 0
+                new_X_index = self.__union_one_half_set(subsamples, index)
+                new_X_index = np.union1d(new_X_index, error_index)
+            else
+                new_X_index = self.__union_set(subsamples, index)
+                flag = 2
+
+            new_X_index = [int(v) for v in new_X_index]
+
             X = X[new_X_index,]
             y = y[new_X_index,]
             n.append(X.shape[0])
@@ -234,9 +247,12 @@ class RandomSamplingSVM(object):
             if debug:
                 print("Number of SVs: %d / %d" % (n[i], n[i-1]))
                 print("Execute time (in second): %s" % (time.time() - starttime))
+
+            if flag == 2:
+                break
             
             if  g*n[i]*k/c >= (n[i-1]-n[i])**2:
-                break
+                flag = 1
         svc = SVC(**self.svm_parameters)
         self.model = svc.fit(X,y)
         return self.model
