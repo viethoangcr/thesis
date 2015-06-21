@@ -3,6 +3,7 @@
 Created on Sun May 17 18:03:40 2015
 
 @author: Viet Hoang
+@author: ultimate.lead
 """
 # import libraries
 import numpy as np
@@ -72,19 +73,20 @@ class RandomSamplingSVM(object):
             ind.append(sub)
         return ind
     
-    # this function get list of support vectors
     def __get_svc(self, X, y):
         svc = SVC(**self.svm_parameters)
         svc.fit(X,y)
         return svc
 
+    # this function get list of support vectors
     def __get_support_vectors(self, X,y):
-        #global DEBUG
         svc = SVC(**self.svm_parameters)
-        svc.fit(X,y)
+        svc.fit(X, y)
         return svc.support_
         
     def train(self, X_init,y_init, beta=0.01, g=1, debug=False):
+        print("Original Random Sampling SVM")
+
         c = 1
         i = 0
         X = X_init
@@ -95,7 +97,6 @@ class RandomSamplingSVM(object):
         starttime = time.time()
         
         while True:
-            
             if debug:
                 print()
                 print("Iteration " + str(i+1))
@@ -127,65 +128,14 @@ class RandomSamplingSVM(object):
         svc = SVC(**self.svm_parameters)
         self.model = svc.fit(X,y)
         return self.model
+    
+    def trainDynamic(self, ratioTrainOverTest, X_init, y_init, beta=0.01, g=1, debug=True):
+        if ratioTrainOverTest = 0:
+            # Dont train any but test, what model to test? :lol:
+            return
         
-    def train_one_third(self, X_init,y_init, beta=0.01, g=1, debug=True):
-        c = 1
-        i = 0
-        X = X_init
-        y = y_init
-        N = X.shape[0]
-        n = [N]
-        starttime = time.time()
-        
-        while True:
-            
-            if debug:
-                print()
-                print("Iteration " + str(i+1))
-                
-            i = i + 1
-            k = math.ceil(i*beta*N)
-            m = math.ceil(n[i-1] * g / k)
-            subsamples = self.__create_subsamples(n[i-1], m, k)
-            index = []
+        print("Adjusted RS SVM with Train/Test = %f" %ratioTrainOverTest)
 
-            iSample = 0
-            trainSVC = None
-            error_index = []
-            
-            for sample in subsamples:
-                #try:
-                iSample = (iSample + 1) % 3
-                if iSample == 1:
-                    trainSVC = self.__get_svc(X[sample,], y[sample,])
-                    index.append(trainSVC.support_)
-                else:
-                    for iTestSample in sample:
-                        expected_X = trainSVC.predict(X[iTestSample,])
-                        if expected_X != y[iTestSample,]:
-                            error_index.append(iTestSample)
-                #except BaseException as error:
-                #    print(error)
-                #    return Nones
-                    
-            new_X_index = self.__union_one_third_set(subsamples, index)
-            new_X_index = np.union1d(new_X_index, error_index)
-            new_X_index = [int(v) for v in new_X_index]
-            X = X[new_X_index,]
-            y = y[new_X_index,]
-            n.append(X.shape[0])
-    
-            if debug:
-                print("Number of SVs: %d / %d" % (n[i], n[i-1]))
-                print("Execute time (in second): %s" % (time.time() - starttime))
-            
-            if  g*n[i]*k/c >= (n[i-1]-n[i])**2:
-                break
-        svc = SVC(**self.svm_parameters)
-        self.model = svc.fit(X,y)
-        return self.model
-    
-    def train_one_half(self, X_init,y_init, beta=0.01, g=1, debug=True):
         c = 1
         i = 0
         X = X_init
@@ -193,14 +143,11 @@ class RandomSamplingSVM(object):
         N = X.shape[0]
         n = [N]
         
-        starttime = time.time()
+        startTime = time.time()
         
         while True:
-            
-            if debug:
-                print()
-                print("Iteration " + str(i+1))
-                
+            print()
+            print("Iteration " + str(i+1))    
 
             i = i + 1            
             k = math.ceil(i*beta*N)
@@ -212,8 +159,9 @@ class RandomSamplingSVM(object):
             iSample = 0
             trainSVC = None
             error_index = []
+            matched_index = []
             
-            print("Number of S: %d" %len(subsamples))
+            #print("Number of S: %d" %len(subsamples))
             
             for sample in subsamples:
                 #try:
@@ -224,30 +172,30 @@ class RandomSamplingSVM(object):
                 else:
                     for iTestSample in sample:
                         expected_X = trainSVC.predict(X[iTestSample,])
-                        if expected_X == y[iTestSample,]:
+                        if expected_X != y[iTestSample,]:
                             error_index.append(iTestSample)
-                    
-                    #print("The ratio of error index: %d / %d", len(error_index), len(sample))
-                #except BaseException as error:
-                #    print(error)
-                #    return Nones
-                    
+                        else:
+                            matched_index.append(iTestSample)
         
             new_X_index = self.__union_one_half_set(subsamples, index)
-            new_X_index = np.union1d(new_X_index, error_index)
+
+            if len(error_index) > len(matched_index):
+                new_X_index = np.union1d(new_X_index, error_index)
+            else:
+                new_X_index = np.union1d(new_X_index, matched_index)
             
             new_X_index = [int(v) for v in new_X_index]
 
             X = X[new_X_index,]
             y = y[new_X_index,]
             n.append(X.shape[0])
-    
-            if debug:
-                print("Number of SVs: %d / %d" % (n[i], n[i-1]))
-                print("Execute time (in second): %s" % (time.time() - starttime))
+            
+            print("Number of SVs: %d / %d" % (n[i], n[i-1]))
+            print("Execute time (in second): %s" % (time.time() - startTime))
             
             if  g*n[i]*k/c >= (n[i-1]-n[i])**2:
                 break
+
         svc = SVC(**self.svm_parameters)
         self.model = svc.fit(X,y)
         return self.model
@@ -302,33 +250,3 @@ class RandomSamplingSVM(object):
         (X,y) = handler[0:handler.size]
         self.model = svc.fit(X,y)
         return self.model
-
-def main():
-    start_time = time.time()
-    svm_para = {'C': 10.0, 'kernel': 'rbf', 'gamma': 1.667, 'verbose': False}
-#    svm_para = {'kernel': 'linear', 'verbose': False}
-    # loading data
-#    X_train, y_train = datasets.load_svmlight_file(r'./../dataset/mnist_train_576_rbf_8vr.dat')
-#    X_test, y_test = datasets.load_svmlight_file(r'./../dataset/mnist_test_576_rbf_8vr.dat')
-    
-    
-    svm_para = {'C': 10.0, 'kernel': 'rbf', 'gamma': 0.00002, 'tol': 0.01, 'verbose': False}
-
-    # test ramdom sampling
-    RS_SVM = RandomSamplingSVM(svm_para)
-    model = RS_SVM.train_large_file(r'./../dataset/covtype_tr_2vr.data', debug=True)
-    
-    
-    print("--- %s seconds ---" % (time.time() - start_time))
-    
-    if model is None:
-        print("Can not train the dataset")
-    else:
-        
-        X_test, y_test = datasets.load_svmlight_file(r'./../dataset/covtype_tst_2vr.data')
-        ratio = model.score(X_test,y_test)
-        print(ratio)
-        print("--- %s seconds ---" % (time.time() - start_time))
-        
-if __name__ == '__main__':
-    main()
