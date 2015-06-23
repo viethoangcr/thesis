@@ -30,47 +30,66 @@ class RandomSamplingSVM(object):
             ind = new_index[i]
             index = np.union1d(index, sample[ind])
         return index.tolist()
-    
-    def __union_one_half_set(self, samples, new_index):
-        index = np.array([],dtype=np.int64)
-        N = len(samples)
-        j = 0
-        for i in range(N):
+
+    # this function create subsamples from a set
+    # len of set = [k/ratio, k*ratio, k/ratio, ...]
+    # m = the number of samples
+    # N = the init set
+
+    def __createRatioIndexData(self, N, m, k, ratio):
+        trainIndexSub = []
+        testIndexSub = []
+
+        x = 0
+        P = np.random.permutation(N)
+
+        trainSize = math.ceil(2 * k * ratio)
+        testSize = 2 * k - trainSize
+
+        for i in range(m):
+            sub = np.array([])
+
             if i % 2 == 0:
-                sample = samples[i]
-                ind = new_index[j]
-                j = j + 1
-                index = np.union1d(index, sample[ind])
-        return index.tolist()
+                currentSize = trainSize
+            else:
+                currentSize = testSize
+
+            if x + currentSize < N:
+                sub = P[x : (x + currentSize)]
+                x = x + currentSize
+            else:
+                sub = P[x : N]
+                P = np.random.permutation(N)
+                sub = np.append(sub, P[0 : currentSize - N + x])
+                x = currentSize - N + x
+
+            if i % 2 == 0:
+                trainIndexSub.append(sub)
+            else:
+                testIndexSub.append(sub)
         
-    def __union_one_third_set(self, samples, new_index):
-        index = np.array([],dtype=np.int64)
-        N = len(samples)
-        j = 0
-        for i in range(N):
-            if i % 3 == 0:
-                sample = samples[i]
-                ind = new_index[j]
-                j = j + 1
-                index = np.union1d(index, sample[ind])
-        return index.tolist()
+        return [trainIndexSub, testIndexSub]
         
     # this function create subsamples from a set
     def __create_subsamples(self, N, m, k):
         ind = []
         x = 0
         P = np.random.permutation(N)
+
         for i in range(m):
             sub = np.array([])
-            if x+k < N:
-                sub = P[x:(x+k)]
+
+            if x + k < N:
+                sub = P[x:(x + k)]
                 x = x + k
             else:
                 sub = P[x:N]
                 P = np.random.permutation(N)
-                sub = np.append(sub,P[0:k - N + x])
+                sub = np.append(sub, P[0:k - N + x])
                 x = k - N + x
+            
             ind.append(sub)
+        
         return ind
     
     def __get_svc(self, X, y):
@@ -129,65 +148,59 @@ class RandomSamplingSVM(object):
         self.model = svc.fit(X,y)
         return self.model
     
-    def trainDynamic(self, ratioTrainOverTest, X_init, y_init, beta=0.01, g=1, debug=True):
-        if ratioTrainOverTest = 0:
+    # ratio = #train / #total
+    def trainWithRatio(self, ratio, xTrain, yTrain, beta=0.01, g=1, debug=True):
+        if ratio == 0:
             # Dont train any but test, what model to test? :lol:
             return
         
-        print("Adjusted RS SVM with Train/Test = %f" %ratioTrainOverTest)
-
+        print("Adjusted RS SVM with Train/Total = %f" %ratio)
         c = 1
         i = 0
-        X = X_init
-        y = y_init
+        X = xTrain
+        Y = yTrain
         N = X.shape[0]
         n = [N]
         
         startTime = time.time()
-        
+
         while True:
-            print()
-            print("Iteration " + str(i+1))    
+            i = i + 1
+            print("Iteration = %d" %i)
 
-            i = i + 1            
             k = math.ceil(i*beta*N)
-            m = math.ceil(n[i-1] * g / k)
-            subsamples = self.__create_subsamples(n[i-1], m, k)
-
-            index = []
-
-            iSample = 0
-            trainSVC = None
-            error_index = []
-            matched_index = []
+            m = 2*math.ceil(n[i-1] * g / (k*2))
             
-            #print("Number of S: %d" %len(subsamples))
+            indexData = self.__createRatioIndexData(n[i - 1], m, k, ratio)
+
+            trainIndexSub = indexData[0]
+            testIndexSub = indexData[1]
             
-            for sample in subsamples:
-                #try:
-                iSample = 1 - iSample
-                if iSample == 1:
-                    trainSVC = self.__get_svc(X[sample,], y[sample,])
-                    index.append(trainSVC.support_)
+            nextIndex = []
+
+            for iSub in range(int(m/2)):
+                trainSVC = self.__get_svc(X[trainIndexSub[iSub],], Y[trainIndexSub[iSub],])
+                nextIndex = np.union1d(nextIndex, trainIndexSub[iSub][trainSVC.support_])
+                yExpected = trainSVC.predict(X[testIndexSub[iSub],])
+
+                testErrorIndex = []
+                testSuccessIndex = []
+                
+                for iSample in range(len(yExpected)):
+                    if yExpected[iSample] != Y[testIndexSub[iSub][iSample]]:
+                        testErrorIndex.append(testIndexSub[iSub][iSample])
+                    else:
+                        testSuccessIndex.append(testIndexSub[iSub][iSample])
+
+                if len(testSuccessIndex) > len(testErrorIndex):
+                    nextIndex = np.union1d(nextIndex, testSuccessIndex)
                 else:
-                    for iTestSample in sample:
-                        expected_X = trainSVC.predict(X[iTestSample,])
-                        if expected_X != y[iTestSample,]:
-                            error_index.append(iTestSample)
-                        else:
-                            matched_index.append(iTestSample)
-        
-            new_X_index = self.__union_one_half_set(subsamples, index)
-
-            if len(error_index) > len(matched_index):
-                new_X_index = np.union1d(new_X_index, error_index)
-            else:
-                new_X_index = np.union1d(new_X_index, matched_index)
+                    nextIndex = np.union1d(nextIndex, testErrorIndex)
             
-            new_X_index = [int(v) for v in new_X_index]
+            nextIndex = [int(v) for v in nextIndex]
 
-            X = X[new_X_index,]
-            y = y[new_X_index,]
+            X = X[nextIndex,]
+            Y = Y[nextIndex,]
             n.append(X.shape[0])
             
             print("Number of SVs: %d / %d" % (n[i], n[i-1]))
@@ -197,12 +210,16 @@ class RandomSamplingSVM(object):
                 break
 
         svc = SVC(**self.svm_parameters)
-        self.model = svc.fit(X,y)
+        self.model = svc.fit(X,Y)
         return self.model
     
+    def trainFileWithRatio(self, svmlight_file_address:str, ratio, beta=0.01, g=1, debug=False):
+        xTrain, yTrain = datasets.load_svmlight_file(svmlight_file_address)
+        return self.trainWithRatio(ratio, xTrain, yTrain, beta, g, debug)
+
     def train_by_file(self, svmlight_file_address:str, beta=0.01, g=1, debug=False):
-        X_train, y_train = datasets.load_svmlight_file(svmlight_file_address)
-        return self.train_one_half(X_train, y_train, beta, g, debug)
+        xTrain, yTrain = datasets.load_svmlight_file(svmlight_file_address)
+        return self.train(xTrain, yTrain, beta, g, debug)
         
     def train_large_file(self, svmlight_file_address:str, beta=0.01, g=1, debug=False, temp_folder=None):
         c = 1

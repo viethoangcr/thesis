@@ -36,6 +36,25 @@ def rs_svm(train_file, test_file, kernel):
     ratio = model.score(X_test,y_test)
     print("Accuracy %f" % ratio)
     print("Total time: %s" % (time.time() - start_time))
+
+def rs_svm_ratio_test(train_file, test_file, kernel):
+    print("Ramdom Sampling SVM with Ratio")
+    RS_SVM = RandomSamplingSVM(kernel)
+
+    for iRatio in range(9):
+        start_time = time.time()
+        trainRatio = iRatio * 0.1 + 0.2
+        model = RS_SVM.trainFileWithRatio(train_file, ratio=trainRatio, debug=True)
+
+        print("Remain SVs: " + str(model.n_support_))
+        print("Training time: %s" % (time.time() - start_time))
+
+        xTest, yTest = datasets.load_svmlight_file(test_file)
+        testRatio = model.score(xTest, yTest)
+
+        print("Accuracy %f" % testRatio)
+        print("Total time: %s" % (time.time() - start_time))
+        print()
     
 def rs_svm_large_file(train_file, test_file, kernel):
     print("Ramdom Sampling SVM for large dataset")
@@ -56,7 +75,9 @@ def test(train_file, test_file, kernel):
 #    single_svm(train_file, test_file, kernel)
     
     # RS_SVM using RAM
-    rs_svm(train_file, test_file, kernel)
+    #rs_svm(train_file, test_file, kernel)
+    rs_svm_ratio_test(train_file, test_file, kernel)
+
     
     #RS_SVM using disk as cache
     #rs_svm_large_file(train_file, test_file, kernel)
@@ -66,10 +87,10 @@ def test(train_file, test_file, kernel):
 #X_train, y_train = datasets.load_svmlight_file(r'./w8a')
 #handler = SvmlightFileHandler(r'./w8a')
 
-start_time = time.time()
+#start_time = time.time()
 
-#svm_para = {'C': 10.0, 'kernel': 'rbf', 'gamma': 1.667, 'verbose': False}
-#test(r'./dataset/mnist_train_576_rbf_8vr.dat', r'./dataset/mnist_test_576_rbf_8vr.dat', svm_para)
+svm_para = {'C': 10.0, 'kernel': 'rbf', 'gamma': 1.667, 'verbose': False}
+test(r'./dataset/mnist_train_576_rbf_8vr.dat', r'./dataset/mnist_test_576_rbf_8vr.dat', svm_para)
 
 #test(r'./../dataset/mnist_train_784_poly_8vr.dat', r'./../dataset/mnist_test_784_poly_8vr.dat', svm_para)
 
