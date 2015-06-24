@@ -39,7 +39,7 @@ def rs_svm(train_file, test_file, kernel):
 
 def rs_svm_ratio_test(train_file, test_file, kernel):
     print("Ramdom Sampling SVM with Ratio")
-    xTrain, yTrain = datasets.load_svmlight_file(svmlight_file_address)
+    xTrain, yTrain = datasets.load_svmlight_file(train_file)
     xTest, yTest = datasets.load_svmlight_file(test_file)
 
     for iRatio in range(9):
