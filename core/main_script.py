@@ -39,17 +39,20 @@ def rs_svm(train_file, test_file, kernel):
 
 def rs_svm_ratio_test(train_file, test_file, kernel):
     print("Ramdom Sampling SVM with Ratio")
-    RS_SVM = RandomSamplingSVM(kernel)
+    xTrain, yTrain = datasets.load_svmlight_file(svmlight_file_address)
+    xTest, yTest = datasets.load_svmlight_file(test_file)
 
     for iRatio in range(9):
+        RS_SVM = RandomSamplingSVM(kernel)
+
         start_time = time.time()
         trainRatio = iRatio * 0.1 + 0.2
-        model = RS_SVM.trainFileWithRatio(train_file, ratio=trainRatio, debug=True)
+        
+        model = trainWithRatio(trainRatio, xTrain, yTrain)
 
         print("Remain SVs: " + str(model.n_support_))
         print("Training time: %s" % (time.time() - start_time))
-
-        xTest, yTest = datasets.load_svmlight_file(test_file)
+        
         testRatio = model.score(xTest, yTest)
 
         print("Accuracy %f" % testRatio)
