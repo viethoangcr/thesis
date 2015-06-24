@@ -48,7 +48,7 @@ def rs_svm_ratio_test(train_file, test_file, kernel):
         start_time = time.time()
         trainRatio = iRatio * 0.1 + 0.2
         
-        model = trainWithRatio(trainRatio, xTrain, yTrain)
+        model = RS_SVM.trainWithRatio(trainRatio, xTrain, yTrain)
 
         print("Remain SVs: " + str(model.n_support_))
         print("Training time: %s" % (time.time() - start_time))
