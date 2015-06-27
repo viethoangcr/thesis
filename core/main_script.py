@@ -26,38 +26,38 @@ def single_svm(train_file, test_file, kernel):
     print("Total time: %s" % (time.time() - start_time))
     
 def rs_svm(train_file, test_file, kernel):
-    print("Ramdom Sampling SVM")
+    print("Ramdom Sampling SVM", flush=True)
     start_time = time.time()
     RS_SVM = RandomSamplingSVM(kernel)
     model = RS_SVM.train_by_file(train_file, debug=True)
-    print("Remain SVs: " + str(model.n_support_))
-    print("Training time: %s" % (time.time() - start_time))
+    print("Remain SVs: " + str(model.n_support_), flush=True)
+    print("Training time: %s" % (time.time() - start_time), flush=True)
     X_test, y_test = datasets.load_svmlight_file(test_file)
     ratio = model.score(X_test,y_test)
-    print("Accuracy %f" % ratio)
-    print("Total time: %s" % (time.time() - start_time))
+    print("Accuracy %f" % ratio, flush=True)
+    print("Total time: %s" % (time.time() - start_time), flush=True)
 
 def rs_svm_ratio_test(train_file, test_file, kernel):
-    print("Ramdom Sampling SVM with Ratio")
+    print("Ramdom Sampling SVM with Ratio", flush=True)
     xTrain, yTrain = datasets.load_svmlight_file(train_file)
     xTest, yTest = datasets.load_svmlight_file(test_file)
 
-    for iRatio in range(9):
+    for iRatio in range(6):
         RS_SVM = RandomSamplingSVM(kernel)
 
         start_time = time.time()
-        trainRatio = iRatio * 0.1 + 0.2
+        trainRatio = iRatio * 0.1 + 0.5
         
         model = RS_SVM.trainWithRatio(trainRatio, xTrain, yTrain)
 
-        print("Remain SVs: " + str(model.n_support_))
-        print("Training time: %s" % (time.time() - start_time))
+        print("Remain SVs: " + str(model.n_support_), flush=True)
+        print("Training time: %s" % (time.time() - start_time), flush=True)
         
         testRatio = model.score(xTest, yTest)
 
-        print("Accuracy %f" % testRatio)
-        print("Total time: %s" % (time.time() - start_time))
-        print()
+        print("Accuracy %f" % testRatio, flush=True)
+        print("Total time: %s" % (time.time() - start_time), flush=True)
+        print(flush=True)
     
 def rs_svm_large_file(train_file, test_file, kernel):
     print("Ramdom Sampling SVM for large dataset")
@@ -79,6 +79,7 @@ def test(train_file, test_file, kernel):
     
     # RS_SVM using RAM
     #rs_svm(train_file, test_file, kernel)
+    print('-----', flush=True)
     rs_svm_ratio_test(train_file, test_file, kernel)
 
     
@@ -92,10 +93,10 @@ def test(train_file, test_file, kernel):
 
 #start_time = time.time()
 
-svm_para = {'C': 10.0, 'kernel': 'rbf', 'gamma': 1.667, 'verbose': False}
-test(r'./dataset/mnist_train_576_rbf_8vr.dat', r'./dataset/mnist_test_576_rbf_8vr.dat', svm_para)
+#svm_para = {'C': 10.0, 'kernel': 'rbf', 'gamma': 1.667, 'verbose': False}
+#test(r'./dataset/mnist_train_576_rbf_8vr.dat', r'./dataset/mnist_test_576_rbf_8vr.dat', svm_para)
 
 #test(r'./../dataset/mnist_train_784_poly_8vr.dat', r'./../dataset/mnist_test_784_poly_8vr.dat', svm_para)
-
-#svm_para = {'C': 10.0, 'kernel': 'rbf', 'gamma': 0.00002, 'tol': 0.01, 'verbose': False}
-#test(r'./dataset/covtype_tr_2vr.data', r'./dataset/covtype_tst_2vr.data', svm_para)
+print(time.time(), flush=True)
+svm_para = {'C': 10.0, 'kernel': 'rbf', 'gamma': 0.00002, 'tol': 0.01, 'verbose': False}
+test(r'./dataset/covtype_tr_2vr.data', r'./dataset/covtype_tst_2vr.data', svm_para)

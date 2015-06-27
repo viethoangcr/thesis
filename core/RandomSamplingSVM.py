@@ -104,7 +104,7 @@ class RandomSamplingSVM(object):
         return svc.support_
         
     def train(self, X_init,y_init, beta=0.01, g=1, debug=False):
-        print("Original Random Sampling SVM")
+        print("Original Random Sampling SVM", flush=True)
 
         c = 1
         i = 0
@@ -118,7 +118,7 @@ class RandomSamplingSVM(object):
         while True:
             if debug:
                 print()
-                print("Iteration " + str(i+1))
+                print("Iteration " + str(i+1), flush=True)
                 
             i = i + 1
             k = math.ceil(i*beta*N)
@@ -139,8 +139,8 @@ class RandomSamplingSVM(object):
             n.append(X.shape[0])
     
             if debug:
-                print("Number of SVs: %d / %d" % (n[i], n[i-1]))
-                print("Execute time (in second): %s" % (time.time() - starttime))
+                print("Number of SVs: %d / %d" % (n[i], n[i-1]), flush=True)
+                print("Execute time (in second): %s" % (time.time() - starttime), flush=True)
             
             if  g*n[i]*k/c >= (n[i-1]-n[i])**2:
                 break
@@ -154,7 +154,7 @@ class RandomSamplingSVM(object):
             # Dont train any but test, what model to test? :lol:
             return
         
-        print("Adjusted RS SVM with Train/Total = %f" %ratio)
+        print("Adjusted RS SVM with Train/Total = %f" %ratio, flush=True)
         c = 1
         i = 0
         X = xTrain
@@ -166,7 +166,7 @@ class RandomSamplingSVM(object):
 
         while True:
             i = i + 1
-            print("Iteration = %d" %i)
+            print("Iteration = %d" %i, flush=True)
 
             k = math.ceil(i*beta*N)
             m = 2*math.ceil(n[i-1] * g / (k*2))
@@ -203,8 +203,8 @@ class RandomSamplingSVM(object):
             Y = Y[nextIndex,]
             n.append(X.shape[0])
             
-            print("Number of SVs: %d / %d" % (n[i], n[i-1]))
-            print("Execute time (in second): %s" % (time.time() - startTime))
+            print("Number of SVs: %d / %d" % (n[i], n[i-1]), flush=True)
+            print("Execute time (in second): %s" % (time.time() - startTime), flush=True)
             
             if  g*n[i]*k/c >= (n[i-1]-n[i])**2:
                 break
