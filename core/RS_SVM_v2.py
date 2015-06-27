@@ -285,7 +285,7 @@ def main():
 #    svm_para = {'kernel': 'linear', 'verbose': False}
 #     loading data
 #    X_train, y_train = datasets.load_svmlight_file(r'./../dataset/mnist_train_576_rbf_8vr.dat')
-    X_train, y_train = datasets.load_svmlight_file(r'./../dataset/covtype_tr_2vr.data')
+    X_train, y_train = datasets.load_svmlight_file(r'./dataset/covtype_tr_2vr.data')
 
 
     svm_para = {'C': 10.0, 'kernel': 'rbf', 'gamma': 0.00002, 'tol': 0.01, 'verbose': False}
