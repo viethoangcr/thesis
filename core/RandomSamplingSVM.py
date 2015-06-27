@@ -189,6 +189,52 @@ class RandomSamplingSVM(object):
         self.model = svc.fit(X,y)
         return self.model
 
+    def train_small_v2(self, X_init,y_init, beta=0.01, g=1, debug=False):
+        print("Small Random Sampling SVM", flush=True)
+
+        c = 1
+        i = 0
+        X = X_init
+        y = y_init
+        N = X.shape[0]
+        n = [N]
+
+        starttime = time.time()
+
+        while True:
+            if debug:
+                print()
+                print("Iteration " + str(i+1), flush=True)
+
+            i = i + 1
+            k = math.ceil(i*beta*n[i - 1])
+            m = math.ceil(n[i-1] * g / k)
+
+            subsamples = self.__create_subsamples(n[i-1], m, k)
+            index = []
+            for sample in subsamples:
+                try:
+                    index.append(self.__get_support_vectors(X[sample,],y[sample,]))
+                except BaseException as error:
+                    print(error)
+                    return None
+
+            new_X_index = self.__union_set(subsamples,index)
+
+            X = X[new_X_index,]
+            y = y[new_X_index,]
+            n.append(X.shape[0])
+
+            if debug:
+                print("Number of SVs: %d / %d" % (n[i], n[i-1]), flush=True)
+                print("Execute time (in second): %s" % (time.time() - starttime), flush=True)
+
+            if g*n[i]*k/c >= (n[i-1]-n[i])**2:
+                break
+        svc = SVC(**self.svm_parameters)
+        self.model = svc.fit(X,y)
+        return self.model
+
     # ratio = #train / #total
     def trainWithRatio(self, ratio, xTrain, yTrain, beta=0.01, g=1, debug=True):
         if ratio == 0:

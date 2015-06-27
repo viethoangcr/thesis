@@ -79,7 +79,7 @@ def test(train_file, test_file, kernel):
     
     # RS_SVM using RAM
     #rs_svm(train_file, test_file, kernel)
-    print('-----', flush=True)
+    #print('-----', flush=True)
     rs_svm(train_file, test_file, kernel)
 
     
