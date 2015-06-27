@@ -171,7 +171,6 @@ class RandomSamplingSVM(object):
 
             indexSub = self.__createRatioIndexData(n[i - 1], m, k, ratio)
             print(len(indexSub))
-            print(m)
 
             trainSVC = None
             nextIndex = []
@@ -189,7 +188,9 @@ class RandomSamplingSVM(object):
                     testErrorIndex = np.unique(np.nonzero((yExpected - Y[indexSub[iSub],]) != 0)[0])
                     testSuccessIndex = np.unique(np.nonzero((yExpected - Y[indexSub[iSub],]) == 0)[0])
 
-                    delta = 0.75
+                    delta = len(trainSVC.support_) / trainSize
+                    #print(delta)
+
                     errorRatio = len(testErrorIndex) / (len(testErrorIndex) + len(testSuccessIndex))
                     correctRatio = 1 - errorRatio
 
