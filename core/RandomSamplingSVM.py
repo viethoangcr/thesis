@@ -213,7 +213,7 @@ class RandomSamplingSVM(object):
         self.model = svc.fit(X,Y)
         return self.model
     
-    def trainFileWithRatio(self, svmlight_file_address:str, ratio, beta=0.01, g=1, debug=False):
+    def trainFileWithRatio(self, ratio, beta=0.01, g=1, debug=False):
         xTrain, yTrain = datasets.load_svmlight_file(svmlight_file_address)
         return self.trainWithRatio(ratio, xTrain, yTrain, beta, g, debug)
 
