@@ -291,7 +291,7 @@ def main():
     svm_para = {'C': 10.0, 'kernel': 'rbf', 'gamma': 0.00002, 'tol': 0.01, 'verbose': False}
 
     # test ramdom sampling
-    RS_SVM = RandomSamplingSVM(svm_para)
+    #RS_SVM = RandomSamplingSVM(svm_para)
     model = RS_SVM.train_one_half_v2(X_train, y_train)
 
     print("Remain SVs: " + str(model.n_support_), flush=True)
