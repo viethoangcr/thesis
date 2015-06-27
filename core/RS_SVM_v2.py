@@ -119,6 +119,49 @@ class RandomSamplingSVM(object):
         self.model = svc.fit(X,y)
         return self.model
 
+    def train_small(self, X_init,y_init, beta=0.01, g=1, debug=False):
+        c = 1
+        i = 0
+        X = X_init
+        y = y_init
+        N = X.shape[0]
+        n = [N]
+        starttime = time.time()
+
+        while True:
+
+            if debug:
+                print()
+                print("Iteration " + str(i+1), flush=True)
+
+            i = i + 1
+            k = math.ceil(i*beta*N)
+            m = math.ceil(n[i-1] * g / k)
+            subsamples = self.__create_subsamples(n[i-1], m, k)
+            index = []
+            for sample in subsamples:
+                try:
+                    index.append(self.__get_support_vectors(X[sample,],y[sample,]))
+                except BaseException as error:
+                    print(error)
+                    return None
+
+            new_X_index = self.__union_set(subsamples,index)
+
+            X = X[new_X_index,]
+            y = y[new_X_index,]
+            n.append(X.shape[0])
+
+            if debug:
+                print("Number of SVs: %d / %d" % (n[i], n[i-1]))
+                print("Execute time (in second): %s" % (time.time() - starttime))
+
+            if  g*n[i]*k/c >= (n[i-1]-n[i])**2:
+                break
+        svc = SVC(**self.svm_parameters)
+        self.model = svc.fit(X,y)
+        return self.model
+
 
     def train_one_half(self, X_init,y_init, beta=0.01, g=1, debug=True):
         c = 1
@@ -206,11 +249,7 @@ class RandomSamplingSVM(object):
                     cor =np.unique(np.nonzero((y_predict - y[sample,]) == 0)[0])
                     #
                     delta = 0.5
-#                    temp = min(cor.shape[0], max(0, (1 + delta) * incor.shape[0] - index[-1].shape[0]))
-                    temp = int(delta * cor.shape[0])
-                    #print(cor.shape[0], incor.shape[0], trainSVC.support_.shape[0], temp)
-                    index.append(np.concatenate((incor,
-                            cor[self.__select_randomly(cor.shape[0], temp)])))
+                    
 
             new_X_index = self.__union_set(subsamples, index)
 

@@ -265,7 +265,7 @@ class RandomSamplingSVM(object):
 
     def train_by_file(self, svmlight_file_address:str, beta=0.01, g=1, debug=False):
         xTrain, yTrain = datasets.load_svmlight_file(svmlight_file_address)
-        return self.train(xTrain, yTrain, beta, g, debug)
+        return self.train_small(xTrain, yTrain, beta, g, debug)
 
     def train_large_file(self, svmlight_file_address:str, beta=0.01, g=1, debug=False, temp_folder=None):
         c = 1
