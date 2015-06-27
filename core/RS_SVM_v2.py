@@ -183,7 +183,7 @@ class RandomSamplingSVM(object):
 
             if debug:
                 print()
-                print("Iteration " + str(i+1))
+                print("Iteration " + str(i+1), flush=True)
 
             i = i + 1
             k = math.ceil(i*beta*n[-1])
@@ -219,8 +219,8 @@ class RandomSamplingSVM(object):
             n.append(X.shape[0])
 
             if debug:
-                print("Number of SVs: %d / %d" % (n[i], n[i-1]))
-                print("Execute time (in second): %s" % (time.time() - starttime))
+                print("Number of SVs: %d / %d" % (n[i], n[i-1]), flush=True)
+                print("Execute time (in second): %s" % (time.time() - starttime), flush=True)
 
             if  g*n[i]*i*beta*N/c >= (n[i-1]-n[i])**2:
                 break
@@ -298,11 +298,11 @@ def main():
     print("--- %s seconds ---" % (time.time() - start_time), flush=True)
 
     if model is None:
-        print("Can not train the dataset")
+        print("Can not train the dataset", flush=True)
     else:
 
 #        X_test, y_test = datasets.load_svmlight_file(r'./../dataset/mnist_test_576_rbf_8vr.dat')
-        X_test, y_test = datasets.load_svmlight_file(r'./../dataset/covtype_tst_2vr.data')
+        X_test, y_test = datasets.load_svmlight_file(r'./dataset/covtype_tst_2vr.data')
         ratio = model.score(X_test,y_test)
         print(ratio)
         print("--- %s seconds ---" % (time.time() - start_time), flush=True)
