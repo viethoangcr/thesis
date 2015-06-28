@@ -93,10 +93,13 @@ def test(train_file, test_file, kernel):
 
 #start_time = time.time()
 
-#svm_para = {'C': 10.0, 'kernel': 'rbf', 'gamma': 1.667, 'verbose': False}
-#test(r'./dataset/mnist_train_576_rbf_8vr.dat', r'./dataset/mnist_test_576_rbf_8vr.dat', svm_para)
+svm_para = {'C': 10.0, 'kernel': 'rbf', 'gamma': 1.667, 'verbose': False}
+test(r'./dataset/mnist_train_576_rbf_8vr.dat', r'./dataset/mnist_test_576_rbf_8vr.dat', svm_para)
 
-#test(r'./../dataset/mnist_train_784_poly_8vr.dat', r'./../dataset/mnist_test_784_poly_8vr.dat', svm_para)
-print(time.time(), flush=True)
-svm_para = {'C': 10.0, 'kernel': 'rbf', 'gamma': 0.00002, 'tol': 0.01, 'verbose': False}
-test(r'./dataset/covtype_tr_2vr.data', r'./dataset/covtype_tst_2vr.data', svm_para)
+#test(r'./dataset/mnist_train_784_poly_8vr.dat', r'./dataset/mnist_test_784_poly_8vr.dat', svm_para)
+#print(time.time(), flush=True)
+#svm_para = {'C': 10.0, 'kernel': 'rbf', 'gamma': 0.00002, 'tol': 0.01, 'verbose': False}
+#test(r'./dataset/covtype_tr_2vr.data', r'./dataset/covtype_tst_2vr.data', svm_para)
+
+#svm_para = {'C': 1.0, 'kernel': 'rbf', 'gamma': 1/199532, 'verbose': False}
+#test(r'./dataset/census.train', r'./dataset/census.test', svm_para)
