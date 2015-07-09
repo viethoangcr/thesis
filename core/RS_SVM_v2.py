@@ -186,14 +186,18 @@ class RandomSamplingSVM(object):
 
 def main():
     
-    svm_para = {'C': 10.0, 'kernel': 'rbf', 'gamma': 1.667, 'verbose': False}
+    #svm_para = {'C': 10.0, 'kernel': 'rbf', 'gamma': 1.667, 'verbose': False}
     #svm_para = {'kernel': 'linear', 'verbose': False}
     #loading data
-    X_train, y_train = datasets.load_svmlight_file(r'./dataset/mnist_train_784_poly_8vr.dat')
+    #X_train, y_train = datasets.load_svmlight_file(r'./dataset/mnist_train_784_poly_8vr.dat')
     #X_train, y_train = datasets.load_svmlight_file(r'./dataset/covtype_tr_2vr.data')
 
 
     #svm_para = {'C': 10.0, 'kernel': 'rbf', 'gamma': 0.00002, 'tol': 0.01, 'verbose': False}
+    
+    #census
+    svm_para = {'C': 10.0, 'kernel': 'rbf', 'gamma': 1.667, 'verbose': False}
+    X_train, y_train = datasets.load_svmlight_file(r'./dataset/census.train')
 
     # test ramdom sampling
     RS_SVM = RandomSamplingSVM(svm_para)
@@ -207,8 +211,9 @@ def main():
         print("Can not train the dataset", flush=True)
     else:
 
-        X_test, y_test = datasets.load_svmlight_file(r'./dataset/mnist_test_784_poly_8vr.dat')
+        #X_test, y_test = datasets.load_svmlight_file(r'./dataset/mnist_test_784_poly_8vr.dat')
         #X_test, y_test = datasets.load_svmlight_file(r'./dataset/covtype_tst_2vr.data')
+        X_test, y_test = datasets.load_svmlight_file(r'./dataset/census.train')
         ratio = model.score(X_test,y_test)
         print(ratio)
         print("--- %s seconds ---" % (time.time() - start_time), flush=True)
