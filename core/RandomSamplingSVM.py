@@ -298,7 +298,7 @@ class RandomSamplingSVM(object):
             print("Number of SVs: %d / %d" % (n[i], n[i-1]), flush=True)
             print("Execute time (in second): %s" % (time.time() - startTime), flush=True)
 
-            if  g*n[i]*i*beta*N/c >= (n[i-1]-n[i])**2:
+            if  m*k*k >= (n[i-1]-n[i])**2:
                 break
 
         svc = SVC(**self.svm_parameters)

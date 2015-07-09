@@ -8,6 +8,7 @@ Created on Mon Jun 15 00:51:07 2015
 from RandomSamplingSVM import RandomSamplingSVM
 import time
 from sklearn import datasets
+from sklearn import feature_extraction
 from sklearn import svm
 
 
@@ -37,12 +38,12 @@ def rs_svm(train_file, test_file, kernel):
     print("Accuracy %f" % ratio, flush=True)
     print("Total time: %s" % (time.time() - start_time), flush=True)
 
-def rs_svm_ratio_test(train_file, test_file, kernel):
+def rs_svm_ratio(train_file, test_file, kernel):
     print("Ramdom Sampling SVM with Ratio", flush=True)
     xTrain, yTrain = datasets.load_svmlight_file(train_file)
     xTest, yTest = datasets.load_svmlight_file(test_file)
 
-    for iRatio in range(6):
+    for iRatio in range(5):
         RS_SVM = RandomSamplingSVM(kernel)
 
         start_time = time.time()
@@ -80,7 +81,7 @@ def test(train_file, test_file, kernel):
     # RS_SVM using RAM
     #rs_svm(train_file, test_file, kernel)
     #print('-----', flush=True)
-    rs_svm(train_file, test_file, kernel)
+    rs_svm_ratio(train_file, test_file, kernel)
 
     
     #RS_SVM using disk as cache
@@ -97,6 +98,10 @@ def test(train_file, test_file, kernel):
 #test(r'./dataset/mnist_train_576_rbf_8vr.dat', r'./dataset/mnist_test_576_rbf_8vr.dat', svm_para)
 
 #test(r'./../dataset/mnist_train_784_poly_8vr.dat', r'./../dataset/mnist_test_784_poly_8vr.dat', svm_para)
-print(time.time(), flush=True)
-svm_para = {'C': 10.0, 'kernel': 'rbf', 'gamma': 0.00002, 'tol': 0.01, 'verbose': False}
-test(r'./dataset/covtype_tr_2vr.data', r'./dataset/covtype_tst_2vr.data', svm_para)
+#print(time.time(), flush=True)
+#svm_para = {'C': 10.0, 'kernel': 'rbf', 'gamma': 0.00002, 'tol': 0.01, 'verbose': False}
+#test(r'./dataset/covtype_tr_2vr.data', r'./dataset/covtype_tst_2vr.data', svm_para)
+#k = feature_extraction.text.TfidfVectorizer();
+#m = k.fit_transform(r'./dataset/census-income.data')
+
+print(m.X)
