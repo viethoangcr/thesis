@@ -101,7 +101,7 @@ class RandomSamplingSVM(object):
     def train(self, X_init,y_init, beta=0.01, g=1, debug=False):
         print("Original Random Sampling SVM", flush=True)
 
-        c = 1
+        c = 8
         i = 0
         X = X_init
         y = y_init
@@ -183,7 +183,7 @@ class RandomSamplingSVM(object):
                 print("Number of SVs: %d / %d" % (n[i], n[i-1]), flush=True)
                 print("Execute time (in second): %s" % (time.time() - starttime), flush=True)
 
-            if  g*n[i]*i*beta*N/c >= (n[i-1]-n[i])**2:
+            if  g*n[i-1]*i*beta*N/c >= (n[i-1]-n[i])**2:
                 break
         svc = SVC(**self.svm_parameters)
         self.model = svc.fit(X,y)
@@ -311,7 +311,7 @@ class RandomSamplingSVM(object):
 
     def train_by_file(self, svmlight_file_address:str, beta=0.01, g=1, debug=False):
         xTrain, yTrain = datasets.load_svmlight_file(svmlight_file_address)
-        return self.train_small(xTrain, yTrain, beta, g, debug)
+        return self.train(xTrain, yTrain, beta, g, debug)
 
     def train_large_file(self, svmlight_file_address:str, beta=0.01, g=1, debug=False, temp_folder=None):
         c = 1
