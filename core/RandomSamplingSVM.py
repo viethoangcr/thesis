@@ -253,10 +253,10 @@ class RandomSamplingSVM(object):
 
         while True:
             i = i + 1
-            print("Iteration = %d" %i, flush=True)
-
             k = math.ceil(i*beta*n[i - 1])
             m = math.ceil(n[i - 1] * g / k)
+
+            print("i = %d, m = %d, k = %d" %(i, m, d), flush=True)
 
             trainSize = math.ceil(2 * k * ratio)
             testSize = 2 * k - trainSize
@@ -285,6 +285,8 @@ class RandomSamplingSVM(object):
 
                     errorRatio = len(testErrorIndex) / (len(testErrorIndex) + len(testSuccessIndex))
                     correctRatio = 1 - errorRatio
+
+                    print("\t[[ e = %f, r = %f ]]", %(errorRatio, delta), flush=True)
 
                     nextIndex = np.append(nextIndex, indexSub[iSub][testErrorIndex[0 : testSize*errorRatio*delta]])
                     nextIndex = np.append(nextIndex, indexSub[iSub][testSuccessIndex[0 : testSize*correctRatio*delta]])
