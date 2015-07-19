@@ -72,8 +72,21 @@ def rs_svm_large_file(train_file, test_file, kernel):
     print("Accuracy %f" % ratio)
     print("Total time: %s" % (time.time() - start_time))
 
+def signle_svm(train_file, test_file, kernel):
+    print("Single SVM", flush=True)
+    start_time = time.time()
+    RS_SVM = RandomSamplingSVM(kernel)
+    model = RS_SVM.train_single(train_file)
+    print("Remain SVs: " + str(model.n_support_), flush=True)
+    print("Training time: %s" % (time.time() - start_time), flush=True)
+    X_test, y_test = datasets.load_svmlight_file(test_file)
+    ratio = model.score(X_test,y_test)
+    print("Accuracy %f" % ratio, flush=True)
+    print("Total time: %s" % (time.time() - start_time), flush=True)  
+
 def test(train_file, test_file, kernel):
-    print("DATASET: " + train_file)
+    print(flush=True)
+    print("DATASET: " + train_file, flush=True)
     
     # Single
 #    single_svm(train_file, test_file, kernel)
@@ -81,7 +94,7 @@ def test(train_file, test_file, kernel):
     # RS_SVM using RAM
     #rs_svm(train_file, test_file, kernel)
     #print('-----', flush=True)
-    rs_svm_ratio(train_file, test_file, kernel)
+    signle_svm(train_file, test_file, kernel)
 
     
     #RS_SVM using disk as cache
@@ -97,10 +110,10 @@ def test(train_file, test_file, kernel):
 svm_para = {'C': 10.0, 'kernel': 'rbf', 'gamma': 1.667, 'verbose': False}
 test(r'./dataset/mnist_train_576_rbf_8vr.dat', r'./dataset/mnist_test_576_rbf_8vr.dat', svm_para)
 
-#test(r'./dataset/mnist_train_784_poly_8vr.dat', r'./dataset/mnist_test_784_poly_8vr.dat', svm_para)
-#print(time.time(), flush=True)
-#svm_para = {'C': 10.0, 'kernel': 'rbf', 'gamma': 0.00002, 'tol': 0.01, 'verbose': False}
-#test(r'./dataset/covtype_tr_2vr.data', r'./dataset/covtype_tst_2vr.data', svm_para)
+test(r'./dataset/mnist_train_784_poly_8vr.dat', r'./dataset/mnist_test_784_poly_8vr.dat', svm_para)
+print(time.time(), flush=True)
+svm_para = {'C': 10.0, 'kernel': 'rbf', 'gamma': 0.00002, 'tol': 0.01, 'verbose': False}
+test(r'./dataset/covtype_tr_2vr.data', r'./dataset/covtype_tst_2vr.data', svm_para)
 
-#svm_para = {'C': 1.0, 'kernel': 'rbf', 'gamma': 1/199532, 'verbose': False}
-#test(r'./dataset/census.train', r'./dataset/census.test', svm_para)
+svm_para = {'C': 1.0, 'kernel': 'rbf', 'gamma': 1/199532, 'verbose': False}
+test(r'./dataset/census.train', r'./dataset/census.test', svm_para)
