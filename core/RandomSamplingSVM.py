@@ -259,7 +259,7 @@ class RandomSamplingSVM(object):
             # Dont train any but test, what model to test? :lol:
             return
 
-        print("Dynamic Training with Train/Total = %f, nCore = " %(ratio, nCore), flush=True)
+        print("Dynamic Training with Train/Total = %f, nCore = %d" %(ratio, nCore), flush=True)
         c = nCore
         i = 0
         X = xTrain
