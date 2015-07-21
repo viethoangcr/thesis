@@ -99,7 +99,7 @@ class RandomSamplingSVM(object):
         return svc.support_
 
     def train(self, X_init, y_init, beta, g, nCore):
-        print("Original Random Sampling SVM", flush=True)
+        print("Original Random Sampling SVM, nCore = %d" %nCore, flush=True)
 
         c = nCore
         i = 0
@@ -274,7 +274,7 @@ class RandomSamplingSVM(object):
         while True:
             i = i + 1
             k = math.ceil(i*beta*n[i - 1])
-            m = math.ceil(n[i - 1] * g / k)
+            m = math.ceil(n[i - 1]  / k)
 
             print("i = %d, m = %d, k = %d" %(i, m, d), flush=True)
 
