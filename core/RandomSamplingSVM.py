@@ -112,8 +112,9 @@ class RandomSamplingSVM(object):
         totalReduceTime = 0
 
         while True:
+            coreTime = []
             for iCore in range(nCore):
-                coreTime[iCore] = 0
+                coreTime.append(0)
 
             print("Iteration " + str(i+1), flush=True)
 
@@ -285,8 +286,9 @@ class RandomSamplingSVM(object):
             trainSVC = None
             nextIndex = []
             
+            coreTime = []
             for iCore in range(nCore):
-                coreTime[iCore] = 0
+                coreTime.append(0)
 
             for iSub in range(m):
                 #print("Sub %d" %iSub)
