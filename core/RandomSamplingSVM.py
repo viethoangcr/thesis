@@ -98,10 +98,10 @@ class RandomSamplingSVM(object):
         svc.fit(X, y)
         return svc.support_
 
-    def train(self, X_init,y_init, beta=0.01, g=1, debug=False):
+    def train(self, X_init, y_init, beta, g, nCore):
         print("Original Random Sampling SVM", flush=True)
 
-        c = 8
+        c = nCore
         i = 0
         X = X_init
         y = y_init
@@ -109,36 +109,53 @@ class RandomSamplingSVM(object):
         n = [N]
 
         starttime = time.time()
+        totalReduceTime = 0
 
         while True:
-            if debug:
-                print()
-                print("Iteration " + str(i+1), flush=True)
+            for iCore in range(nCore):
+                coreTime[iCore] = 0
+
+            print("Iteration " + str(i+1), flush=True)
 
             i = i + 1
             k = math.ceil(i*beta*N)
             m = math.ceil(n[i-1] * g / k)
             subsamples = self.__create_subsamples(n[i-1], m, k)
             index = []
+
             for sample in subsamples:
-                try:
-                    index.append(self.__get_support_vectors(X[sample,],y[sample,]))
-                except BaseException as error:
-                    print(error)
-                    return None
+                subStartTime = time.time()
+                
+                index.append(self.__get_support_vectors(X[sample,],y[sample,]))
+
+                subEndTime = time.time()
+                iMinCore = 0
+                for iCore in range(nCore):
+                    if coreTime[iCore] < coreTime[iMinCore]:
+                        iMinCore = iCore
+                coreTime[iMinCore] = coreTime[iMinCore] + subEndTime - subStartTime
+
+            iMaxCore = 0
+            for iCore in range(nCore):
+                totalReduceTime  = totalReduceTime + coreTime[iCore]
+                if coreTime[iCore] > coreTime[iMaxCore]:
+                    iMaxCore = iCore
+
+            totalReduceTime = totalReduceTime - coreTime[iMaxCore]
 
             new_X_index = self.__union_set(subsamples,index)
 
             X = X[new_X_index,]
             y = y[new_X_index,]
             n.append(X.shape[0])
-
-            if debug:
-                print("Number of SVs: %d / %d" % (n[i], n[i-1]), flush=True)
-                print("Execute time (in second): %s" % (time.time() - starttime), flush=True)
+        
+            print("Number of SVs: %d / %d" % (n[i], n[i-1]), flush=True)
+            print("Execute time (in second): %s" % (time.time() - starttime), flush=True)
 
             if  g*n[i]*k/c >= (n[i-1]-n[i])**2:
                 break
+
+        print("Total reducing time: %d" %totalReduceTime, flush=True)
         svc = SVC(**self.svm_parameters)
         self.model = svc.fit(X,y)
         return self.model
@@ -236,13 +253,13 @@ class RandomSamplingSVM(object):
         return self.model
 
     # ratio = #train / #total
-    def trainWithRatio(self, ratio, xTrain, yTrain, beta=0.01, g=1, debug=True):
+    def trainWithRatio(self, ratio, xTrain, yTrain, beta, nCore):
         if ratio == 0:
             # Dont train any but test, what model to test? :lol:
             return
 
-        print("Adjusted RS SVM ver 2 with Train/Total = %f" %ratio, flush=True)
-        c = 1
+        print("Dynamic Training with Train/Total = %f, nCore = " %(ratio, nCore), flush=True)
+        c = nCore
         i = 0
         X = xTrain
         Y = yTrain
@@ -251,6 +268,8 @@ class RandomSamplingSVM(object):
 
         startTime = time.time()
 
+        totalReduceTime = 0
+        
         while True:
             i = i + 1
             k = math.ceil(i*beta*n[i - 1])
@@ -262,14 +281,18 @@ class RandomSamplingSVM(object):
             testSize = 2 * k - trainSize
 
             indexSub = self.__createRatioIndexData(n[i - 1], m, k, ratio)
-            print(len(indexSub))
 
             trainSVC = None
             nextIndex = []
+            
+            for iCore in range(nCore):
+                coreTime[iCore] = 0
 
             for iSub in range(m):
                 #print("Sub %d" %iSub)
                 #print("Sub length: %d" %len(indexSub[iSub]))
+                if iSub % 2 == 0:
+                    subStartTime = time.time()
 
                 if (iSub % 2 == 0):
                     trainSVC = self.__get_svc(X[indexSub[iSub],], Y[indexSub[iSub],])
@@ -286,10 +309,28 @@ class RandomSamplingSVM(object):
                     errorRatio = len(testErrorIndex) / (len(testErrorIndex) + len(testSuccessIndex))
                     correctRatio = 1 - errorRatio
 
-                    print("\t[[ e = %f, r = %f ]]", %(errorRatio, delta), flush=True)
+                    #print("\t[[ e = %f, r = %f ]]" %(errorRatio, delta), flush=True)
 
                     nextIndex = np.append(nextIndex, indexSub[iSub][testErrorIndex[0 : testSize*errorRatio*delta]])
                     nextIndex = np.append(nextIndex, indexSub[iSub][testSuccessIndex[0 : testSize*correctRatio*delta]])
+
+                if (iSub % 2 == 1) or (iSub == m - 1):
+                    subEndTime = time.time()
+                    iMinCore = 0
+
+                    for iCore in range(nCore):
+                        if coreTime[iCore] < coreTime[iMinCore]:
+                            iMinCore = iCore
+
+                    coreTime[iMinCore] = coreTime[iMinCore] + subEndTime - subStartTime
+
+            iMaxCore = 0
+            for iCore in range(nCore):
+                totalReduceTime  = totalReduceTime + coreTime[iCore]
+                if coreTime[iCore] > coreTime[iMaxCore]:
+                    iMaxCore = iCore
+
+            totalReduceTime = totalReduceTime - coreTime[iMaxCore]
 
             nextIndex = [int(v) for v in nextIndex]
 
@@ -303,17 +344,10 @@ class RandomSamplingSVM(object):
             if  m*k*k >= (n[i-1]-n[i])**2:
                 break
 
+        print("Total reducing time: %d" %totalReduceTime, flush=True)
         svc = SVC(**self.svm_parameters)
         self.model = svc.fit(X,Y)
         return self.model
-
-    def trainFileWithRatio(self, ratio, beta=0.01, g=1, debug=False):
-        xTrain, yTrain = datasets.load_svmlight_file(svmlight_file_address)
-        return self.trainWithRatio(ratio, xTrain, yTrain, beta, g, debug)
-
-    def train_by_file(self, svmlight_file_address:str, beta=0.01, g=1, debug=False):
-        xTrain, yTrain = datasets.load_svmlight_file(svmlight_file_address)
-        return self.train(xTrain, yTrain, beta, g, debug)
 
     def train_single(self, svmlight_file_address:str):
         xTrain, yTrain = datasets.load_svmlight_file(svmlight_file_address)
