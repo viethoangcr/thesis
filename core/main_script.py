@@ -100,11 +100,11 @@ def test(train_file, test_file, kernel):
     
     # Single
 #    single_svm(train_file, test_file, kernel)
-    
-    # RS_SVM using RAM
-    rs_svm(train_file, test_file, kernel)
-    #print('-----', flush=True)
     rs_svm_ratio(train_file, test_file, kernel)
+    # RS_SVM using RAM
+    #rs_svm(train_file, test_file, kernel)
+    #print('-----', flush=True)
+    
 
     
     #RS_SVM using disk as cache
