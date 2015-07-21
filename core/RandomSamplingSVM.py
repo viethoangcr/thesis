@@ -276,7 +276,7 @@ class RandomSamplingSVM(object):
             k = math.ceil(i*beta*n[i - 1])
             m = math.ceil(n[i - 1]  / k)
 
-            print("i = %d, m = %d, k = %d" %(i, m, d), flush=True)
+            print("i = %d, m = %d, k = %d" %(i, m, k), flush=True)
 
             trainSize = math.ceil(2 * k * ratio)
             testSize = 2 * k - trainSize
