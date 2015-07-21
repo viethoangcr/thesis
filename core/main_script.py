@@ -102,7 +102,7 @@ def test(train_file, test_file, kernel):
 #    single_svm(train_file, test_file, kernel)
     rs_svm_ratio(train_file, test_file, kernel)
     # RS_SVM using RAM
-    #rs_svm(train_file, test_file, kernel)
+    rs_svm(train_file, test_file, kernel)
     #print('-----', flush=True)
     
 
