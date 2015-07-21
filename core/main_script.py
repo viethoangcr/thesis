@@ -30,8 +30,10 @@ def single_svm(train_file, test_file, kernel):
     print("Total time: %s" % (time.time() - start_time))
     
 def rs_svm(train_file, test_file, kernel):
+    xTrain, yTrain = datasets.load_svmlight_file(train_file)
+    xTest, yTest = datasets.load_svmlight_file(test_file)
+    
     nTestingCore = [1, 2, 4, 8, 16]
-    start_time = time.time()
     RS_SVM = RandomSamplingSVM(kernel)
 
     for iTestingCore in range(5):
@@ -49,9 +51,9 @@ def rs_svm(train_file, test_file, kernel):
         print(flush=True)
 
 def rs_svm_ratio(train_file, test_file, kernel):
-    print("Ramdom Sampling SVM with Ratio", flush=True)
     xTrain, yTrain = datasets.load_svmlight_file(train_file)
     xTest, yTest = datasets.load_svmlight_file(test_file)
+    
     nTestingCore = [1, 2, 4, 8, 16]
     RS_SVM = RandomSamplingSVM(kernel)
 
